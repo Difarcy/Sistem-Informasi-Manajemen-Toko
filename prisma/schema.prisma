@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Model untuk User (Autentikasi)
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(100)
+  password  String   @db.VarChar(255) // hashed password
+  role      Role     @default(user)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// Model untuk Kategori Barang
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(100)
+  description String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@map("categories")
+}
+
+// Model untuk Barang/Produk
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(200)
+  sku         String    @unique @db.VarChar(50)
+  description String?   @db.Text
+  categoryId  Int
+  category    Category  @relation(fields: [categoryId], references: [id])
+  price       Decimal   @db.Decimal(10, 2)
+  stock       Int       @default(0)
+  minStock    Int       @default(0)
+  unit        String    @db.VarChar(20) // pcs, box, pack, dll
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  transactions TransactionItem[]
+
+  @@map("products")
+}
+
+// Model untuk Transaksi
+model Transaction {
+  id          Int                @id @default(autoincrement())
+  type        TransactionType    // MASUK atau KELUAR
+  reference   String?            @db.VarChar(100) // No. faktur, surat jalan, dll
+  notes       String?            @db.Text
+  totalAmount Decimal            @db.Decimal(10, 2)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  items       TransactionItem[]
+
+  @@map("transactions")
+}
+
+// Model untuk Item Transaksi
+model TransactionItem {
+  id            Int         @id @default(autoincrement())
+  transactionId Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  productId     Int
+  product       Product     @relation(fields: [productId], references: [id])
+  quantity      Int
+  price         Decimal     @db.Decimal(10, 2)
+  subtotal      Decimal     @db.Decimal(10, 2)
+  createdAt     DateTime    @default(now())
+
+  @@map("transaction_items")
+}
+
+enum TransactionType {
+  MASUK
+  KELUAR
+}
+
+enum Role {
+  administrator
+  user
+}
+
