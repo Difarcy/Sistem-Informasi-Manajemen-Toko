@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,13 +11,25 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { loginAction } from "./actions";
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
 export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Check if user just registered
+  useEffect(() => {
+    const registered = searchParams.get("registered");
+    if (registered === "true") {
+      setSuccess("Registrasi berhasil! Silakan login dengan akun Anda.");
+      // Clear the query parameter from URL
+      router.replace("/auth/login", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const {
     register,
@@ -29,6 +41,7 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setError("");
+    setSuccess(""); // Clear success message when submitting
     startTransition(async () => {
       const formData = new FormData();
       formData.append("identifier", data.identifier);
@@ -56,6 +69,12 @@ export function LoginForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-sm space-y-4">
+            {success && (
+              <div className="rounded-lg bg-green-50 p-3 text-sm text-green-600 dark:bg-green-900/20 dark:text-green-400 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                {success}
+              </div>
+            )}
             {error && (
               <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
                 {error}

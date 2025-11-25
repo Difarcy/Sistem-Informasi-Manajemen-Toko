@@ -10,7 +10,7 @@
 
 import type { ReactNode } from "react";
 import { getSession } from "@/lib/auth/auth";
-import { Sidebar } from "@/components/layouts/sidebar";
+import Sidebar from "@/components/layouts/sidebar";
 import { UserMenu } from "@/components/layouts/user-menu";
 import { GlobalSearch } from "@/components/dashboard/global-search";
 
@@ -31,11 +31,7 @@ export async function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <Sidebar
-        role={userRole}
-        userName={session?.name}
-        userEmail={session?.email}
-      />
+      <Sidebar role={userRole} />
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-900">

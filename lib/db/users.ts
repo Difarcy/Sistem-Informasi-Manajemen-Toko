@@ -31,11 +31,20 @@ export async function getUserById(id: number) {
   });
 }
 
+export async function getAllUsers() {
+  return await prisma.user.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+
 export async function createUser(data: {
   name: string;
   email: string;
   password: string;
   role?: Role;
+  avatarUrl?: string | null;
 }) {
   return await prisma.user.create({
     data: {
@@ -52,6 +61,7 @@ export async function updateUser(
     email?: string;
     password?: string;
     role?: Role;
+    avatarUrl?: string | null;
   }
 ) {
   return await prisma.user.update({

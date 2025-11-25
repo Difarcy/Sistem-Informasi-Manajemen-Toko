@@ -1,7 +1,7 @@
 "use server";
 
 import { createUser, getUserByEmail } from "@/lib/db/users";
-import { createSession, hashPassword } from "@/lib/auth/auth";
+import { hashPassword } from "@/lib/auth/auth";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -38,19 +38,16 @@ export async function registerAction(formData: FormData) {
     const hashedPassword = await hashPassword(validatedData.password);
 
     // Create user
-    const user = await createUser({
+    await createUser({
       name: validatedData.name,
       email: validatedData.email,
       password: hashedPassword,
       role: "user",
     });
 
-    // Create session
-    await createSession(user.id, user.email, user.name, user.role);
-
     return {
       success: true,
-      message: "Registrasi berhasil",
+      message: "Registrasi berhasil. Silakan login dengan akun Anda.",
     };
   } catch (error) {
     if (error instanceof z.ZodError) {

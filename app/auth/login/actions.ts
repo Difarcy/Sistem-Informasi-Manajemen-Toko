@@ -66,7 +66,11 @@ export async function loginAction(formData: FormData) {
     }
 
     // Create session
-    await createSession(user.id, user.email, user.name, userRole);
+    const avatarUrl =
+      user && typeof user === "object" && "avatarUrl" in user
+        ? ((user as { avatarUrl?: string | null }).avatarUrl ?? null)
+        : null;
+    await createSession(user.id, user.email, user.name, userRole, avatarUrl);
 
     return {
       success: true,

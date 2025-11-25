@@ -40,8 +40,7 @@ export function RegisterForm() {
       const result = await registerAction(formData);
 
       if (result.success) {
-        router.push("/dashboard");
-        router.refresh();
+        router.push("/auth/login?registered=true");
       } else {
         setError(result.message || "Terjadi kesalahan. Silakan coba lagi.");
       }

@@ -2,6 +2,14 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { getUserById } from "@/lib/db/users";
 
+function extractAvatar(user: unknown): string | null {
+  if (user && typeof user === "object" && "avatarUrl" in user) {
+    const value = (user as { avatarUrl?: string | null }).avatarUrl;
+    return value ?? null;
+  }
+  return null;
+}
+
 // Hash password
 export async function hashPassword(password: string): Promise<string> {
   return await bcrypt.hash(password, 10);
@@ -16,7 +24,13 @@ export async function verifyPassword(
 }
 
 // Create session (simple cookie-based session)
-export async function createSession(userId: number, email: string, name: string, role: "administrator" | "user") {
+export async function createSession(
+  userId: number,
+  email: string,
+  name: string,
+  role: "administrator" | "user",
+  avatarUrl?: string | null
+) {
   const cookieStore = await cookies();
   
   // Ensure role is valid
@@ -39,6 +53,7 @@ export async function createSession(userId: number, email: string, name: string,
     email,
     name,
     role: validRole,
+    avatarUrl: avatarUrl ?? null,
     createdAt: new Date().toISOString(),
   };
   
@@ -67,7 +82,16 @@ export async function createSession(userId: number, email: string, name: string,
 }
 
 // Get session
-export async function getSession(): Promise<{ userId: number; email: string; name: string; role: "administrator" | "user"; createdAt: string } | null> {
+type SessionData = {
+  userId: number;
+  email: string;
+  name: string;
+  role: "administrator" | "user";
+  createdAt: string;
+  avatarUrl: string | null;
+};
+
+export async function getSession(): Promise<SessionData | null> {
   const cookieStore = await cookies();
   const session = cookieStore.get("session");
   
@@ -76,7 +100,10 @@ export async function getSession(): Promise<{ userId: number; email: string; nam
   }
   
   try {
-    const sessionData = JSON.parse(session.value);
+    const sessionData: SessionData = {
+      avatarUrl: null,
+      ...JSON.parse(session.value),
+    };
     
     // Always fetch role from database to ensure it's up-to-date
     // NOTE: We don't update the cookie here because cookies can only be modified
@@ -106,9 +133,10 @@ export async function getSession(): Promise<{ userId: number; email: string; nam
       
       if (user && user.role) {
         // Return session with role from database (always sync, but don't update cookie)
-        const updatedSessionData = {
+        const updatedSessionData: SessionData = {
           ...sessionData,
           role: user.role,
+          avatarUrl: extractAvatar(user),
         };
         
         // Debug logging (development only)
@@ -130,6 +158,7 @@ export async function getSession(): Promise<{ userId: number; email: string; nam
         return {
           ...sessionData,
           role: "user",
+          avatarUrl: sessionData.avatarUrl ?? null,
         };
       }
     } else {
@@ -140,6 +169,7 @@ export async function getSession(): Promise<{ userId: number; email: string; nam
       return {
         ...sessionData,
         role: "user",
+        avatarUrl: sessionData.avatarUrl ?? null,
       };
     }
   } catch (error) {
@@ -157,7 +187,9 @@ export async function deleteSession() {
 }
 
 // Helper function to check if user has required role
-export async function requireRole(requiredRole: "administrator" | "user"): Promise<{ success: true; session: { userId: number; email: string; name: string; role: "administrator" | "user"; createdAt: string } } | { success: false; message: string }> {
+export async function requireRole(
+  requiredRole: "administrator" | "user"
+): Promise<{ success: true; session: SessionData } | { success: false; message: string }> {
   const session = await getSession();
   
   if (!session) {
@@ -172,7 +204,7 @@ export async function requireRole(requiredRole: "administrator" | "user"): Promi
 }
 
 // Helper function to check if user is administrator
-export async function requireAdministrator(): Promise<{ success: true; session: { userId: number; email: string; name: string; role: "administrator" | "user"; createdAt: string } } | { success: false; message: string }> {
+export async function requireAdministrator(): Promise<{ success: true; session: SessionData } | { success: false; message: string }> {
   return requireRole("administrator");
 }
 

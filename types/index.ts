@@ -47,6 +47,34 @@ export interface TransactionItem {
   createdAt: Date;
 }
 
+export interface TransactionFormProduct {
+  id: number;
+  name: string;
+  sku: string;
+  unit: string;
+  price: number;
+  stock: number;
+}
+
+export interface TransactionTableItem {
+  id: number;
+  productName: string;
+  unit: string;
+  quantity: number;
+  price: number;
+  subtotal: number;
+}
+
+export interface TransactionRow {
+  id: number;
+  type: TransactionType;
+  reference: string | null;
+  notes: string | null;
+  totalAmount: number;
+  createdAt: string;
+  items: TransactionTableItem[];
+}
+
 export interface StockReport {
   productId: number;
   productName: string;

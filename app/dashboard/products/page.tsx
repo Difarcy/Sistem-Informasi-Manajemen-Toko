@@ -1,6 +1,6 @@
 import { getAllProducts } from "@/lib/db/products";
 import { getAllCategories } from "@/lib/db/categories";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ProductsTable } from "./products-table";
@@ -41,15 +41,8 @@ export default async function ProductsPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Daftar Barang</CardTitle>
-          <CardDescription>Semua barang yang terdaftar dalam sistem</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Total: {products.length} barang</p>
-            <ProductsTable products={products} categories={categories} />
-          </div>
+        <CardContent className="pt-6">
+          <ProductsTable products={products} categories={categories} />
         </CardContent>
       </Card>
     </div>

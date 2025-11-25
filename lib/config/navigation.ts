@@ -16,6 +16,7 @@ import {
   BarChart3,
   FileText,
   Users,
+  Settings,
 } from "lucide-react";
 
 export type UserRole = "administrator" | "user";
@@ -106,6 +107,12 @@ export const navigationSections: NavigationSection[] = [
         href: "/dashboard/users",
         icon: Users,
         roles: ["administrator"], // Admin only
+      },
+      {
+        name: "Pengaturan",
+        href: "/dashboard/settings",
+        icon: Settings,
+        roles: ["administrator", "user"],
       },
     ],
   },

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FolderTree, Plus } from "lucide-react";
 import { getAllCategories } from "@/lib/db/categories";
@@ -26,13 +26,7 @@ export default async function CategoriesPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Daftar Kategori</CardTitle>
-          <CardDescription>
-            Semua kategori yang terdaftar dalam sistem
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {categories.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <FolderTree className="h-12 w-12 text-zinc-400" />
